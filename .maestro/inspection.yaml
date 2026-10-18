@@ -1,0 +1,24 @@
+appId: com.owaismunawar.fieldbook
+---
+- launchApp:
+    clearState: true
+- scrollUntilVisible:
+    element: "Scan sample card"
+- tapOn: "Scan sample card"
+- assertVisible: "Review evidence"
+- scrollUntilVisible:
+    element: "Handrail loose at north stair."
+- tapOn: "Handrail loose at north stair."
+- scrollUntilVisible:
+    element: "Accept reviewed action"
+- tapOn: "Accept reviewed action"
+- tapOn: "Actions"
+- assertVisible: "Review: Handrail loose at north stair."
+- tapOn: "Review: Handrail loose at north stair."
+- scrollUntilVisible:
+    element: "Resolve with a review note"
+- tapOn: "Resolve with a review note"
+- tapOn: "Review note"
+- inputText: "Fixings checked during revisit."
+- tapOn: "Save review"
+- assertVisible: "RESOLVED BY INSPECTOR"
