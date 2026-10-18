@@ -10,3 +10,5 @@ coverage/
 !.env.example
 .flutter-plugins
 .flutter-plugins-dependencies
+__pycache__/
+*.pyc
