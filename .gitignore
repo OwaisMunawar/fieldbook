@@ -8,3 +8,5 @@ coverage/
 .env
 .env.*
 !.env.example
+.flutter-plugins
+.flutter-plugins-dependencies
