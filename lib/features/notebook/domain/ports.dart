@@ -24,5 +24,7 @@ abstract interface class ActionGenerator {
 abstract interface class CaptureSource {
   Future<String?> chooseImage({required bool camera});
   Future<String> sampleImage();
+  Future<String> digest(String path);
+  Future<void> discard(String path);
   Future<String> persist(String path, String id);
 }
