@@ -14,11 +14,13 @@ class SqliteNotebook implements NotebookRepository {
   static Future<SqliteNotebook> open(
     String path, {
     DatabaseFactory? factory,
+    bool singleInstance = true,
   }) async {
     final db = await (factory ?? databaseFactory).openDatabase(
       path,
       options: OpenDatabaseOptions(
         version: 1,
+        singleInstance: singleInstance,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },

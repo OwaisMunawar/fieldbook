@@ -37,7 +37,7 @@ class ReportPage extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                '${snapshot.evidence.length} sources · ${snapshot.issues.length} reviewed actions · $resolved resolved',
+                '${snapshot.evidence.length} ${snapshot.evidence.length == 1 ? 'source' : 'sources'} · ${snapshot.issues.length} reviewed ${snapshot.issues.length == 1 ? 'action' : 'actions'} · $resolved resolved',
               ),
               const SizedBox(height: 24),
               const Divider(),

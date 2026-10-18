@@ -21,42 +21,45 @@ class NotebookController extends ChangeNotifier {
   final String Function() newId;
   final DateTime Function() clock;
   final bool demo;
-  NotebookSnapshot snapshot = NotebookSnapshot(
+  NotebookSnapshot _snapshot = NotebookSnapshot(
     evidence: [],
     issues: [],
     events: [],
   );
-  NotebookFailure? error;
-  bool busy = false;
+  NotebookFailure? _error;
+  bool _busy = false;
+  NotebookSnapshot get snapshot => _snapshot;
+  NotebookFailure? get error => _error;
+  bool get busy => _busy;
 
   Future<void> load() async {
-    snapshot = await repository.read();
+    _snapshot = await repository.read();
     notifyListeners();
   }
 
   void clearError() {
-    error = null;
+    _error = null;
     notifyListeners();
   }
 
   Future<T?> _run<T>(Future<T> Function() operation) async {
     if (busy) return null;
-    busy = true;
-    error = null;
+    _busy = true;
+    _error = null;
     notifyListeners();
     try {
       return await operation();
     } on NotebookFailure catch (failure) {
-      error = failure;
+      _error = failure;
       return null;
     } catch (_) {
-      error = const NotebookFailure(
+      _error = const NotebookFailure(
         FailureCode.storage,
         'The operation could not finish. Reload the notebook before trying again.',
       );
       return null;
     } finally {
-      busy = false;
+      _busy = false;
       notifyListeners();
     }
   }
@@ -64,15 +67,19 @@ class NotebookController extends ChangeNotifier {
   Future<Evidence?> importSample() => _run(
     () async => _capture(await capture.sampleImage(), 'Inspection card 014'),
   );
-  Future<Evidence?> importPhoto({required bool camera}) =>
-      _run<Evidence?>(() async {
-        final path = await capture.chooseImage(camera: camera);
-        if (path == null) return null;
-        return _capture(
-          path,
-          'Field observation ${snapshot.evidence.length + 1}',
-        );
-      });
+  Future<Evidence?> importPhoto({
+    required bool camera,
+  }) => _run<Evidence?>(() async {
+    if (demo) {
+      throw const NotebookFailure(
+        FailureCode.unsupported,
+        'Demo mode uses the sample card. Run standard mode to import your own photos.',
+      );
+    }
+    final path = await capture.chooseImage(camera: camera);
+    if (path == null) return null;
+    return _capture(path, 'Field observation ${snapshot.evidence.length + 1}');
+  });
 
   Future<Evidence> _capture(String path, String title) async {
     final fingerprint = await capture.digest(path);
@@ -106,6 +113,11 @@ class NotebookController extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<bool?> reload() => _run(() async {
+    await load();
+    return true;
+  });
 
   Future<ActionDraft?> draft(Evidence evidence) => _run(() async {
     final candidate = await generator.generate(evidence);

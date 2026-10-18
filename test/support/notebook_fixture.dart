@@ -26,6 +26,7 @@ class TestCapture implements CaptureSource {
 Future<NotebookController> testController({
   bool seeded = false,
   bool memory = false,
+  bool demo = true,
 }) async {
   sqfliteFfiInit();
   final NotebookRepository repository = memory
@@ -42,7 +43,7 @@ Future<NotebookController> testController({
     capture: TestCapture(),
     newId: () => 'id-${++id}',
     clock: () => DateTime.utc(2026, 10, 18, 9),
-    demo: true,
+    demo: demo,
   );
   await controller.load();
   if (seeded) {

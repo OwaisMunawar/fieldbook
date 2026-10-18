@@ -41,7 +41,7 @@ class _SearchPageState extends State<SearchPage> {
         SectionHeading(
           query.isEmpty
               ? 'Your source index'
-              : '${results.length} matching lines',
+              : '${results.length} matching ${results.length == 1 ? 'line' : 'lines'}',
         ),
         if (query.isEmpty)
           const EmptyCard(

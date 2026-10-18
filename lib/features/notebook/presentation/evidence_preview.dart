@@ -23,6 +23,20 @@ class EvidencePreview extends StatelessWidget {
           width: double.infinity,
           fit: BoxFit.fitWidth,
           semanticLabel: 'Original source image for ${evidence.title}',
+          frameBuilder: (context, child, frame, wasSynchronous) => frame == null
+              ? const AspectRatio(
+                  aspectRatio: 0.82,
+                  child: ColoredBox(
+                    color: Palette.mint,
+                    child: Center(
+                      child: Icon(
+                        Icons.description_outlined,
+                        color: Palette.ink,
+                      ),
+                    ),
+                  ),
+                )
+              : child,
           errorBuilder: (context, error, stack) => const AspectRatio(
             aspectRatio: 0.82,
             child: ColoredBox(

@@ -138,6 +138,11 @@ class _NotebookShellState extends State<NotebookShell> {
             ],
           ),
           actions: [
+            IconButton(
+              tooltip: 'Reload notebook',
+              onPressed: controller.busy ? null : controller.reload,
+              icon: const Icon(Icons.refresh),
+            ),
             Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Center(
