@@ -1,0 +1,76 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  FLUTTER_VERSION: 3.44.2
+jobs:
+  quality:
+    name: Strict analysis and domain coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: dart format --output=none --set-exit-if-changed lib test integration_test tool
+      - run: flutter analyze --fatal-infos
+      - run: dart run tool/check_architecture.dart
+      - run: flutter test --coverage --exclude-tags golden
+      - run: dart run tool/coverage_gate.dart
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: coverage
+          path: coverage/lcov.info
+  goldens:
+    name: macOS golden layouts
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter test --tags golden
+      - if: failure()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: golden-failures
+          path: test/goldens/failures/
+  ios:
+    name: Swift 6 iOS simulator build
+    runs-on: macos-15
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Select Xcode 26
+        run: |
+          XCODE_APP=$(find /Applications -maxdepth 1 -name 'Xcode_26*.app' | sort -V | tail -1)
+          test -n "$XCODE_APP"
+          sudo xcode-select --switch "$XCODE_APP/Contents/Developer"
+          xcodebuild -version
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - name: SwiftLint 0.65.1
+        run: |
+          curl -fLsS https://github.com/realm/SwiftLint/releases/download/0.65.1/portable_swiftlint.zip -o "$RUNNER_TEMP/swiftlint.zip"
+          unzip -q "$RUNNER_TEMP/swiftlint.zip" -d "$RUNNER_TEMP/swiftlint"
+          "$RUNNER_TEMP/swiftlint/swiftlint" lint --strict --no-cache ios/Runner/AppDelegate.swift ios/Runner/FieldbookIntelligence.swift
+      - run: flutter build ios --simulator --no-codesign --debug
