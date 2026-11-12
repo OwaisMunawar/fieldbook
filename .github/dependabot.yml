@@ -15,6 +15,11 @@ updates:
       - dependency-name: flutter_test
       - dependency-name: integration_test
       - dependency-name: flutter_lints
+      # Riverpod 3.5 pulls packages that do not resolve on Flutter 3.44.
+      - dependency-name: flutter_riverpod
+        update-types: ['version-update:semver-minor']
+      - dependency-name: riverpod
+        update-types: ['version-update:semver-minor']
   - package-ecosystem: github-actions
     directory: /
     schedule:
